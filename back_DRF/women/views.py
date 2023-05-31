@@ -1,7 +1,8 @@
 from django.forms import model_to_dict
 from django.shortcuts import render
-from .models import Women
+from .models import Category, Women
 from .serializers import WomenSerializer
+from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics, viewsets
@@ -9,10 +10,19 @@ from rest_framework import generics, viewsets
 # Create your views here.
 
 class WomenViewSet(viewsets.ModelViewSet):
-    queryset = Women.objects.all()
+    # queryset = Women.objects.all()
     serializer_class = WomenSerializer
-
-
+    
+    def get_queryset(self):
+        pk = self.kwargs.get('pk')
+        if not pk:
+            return Women.objects.all()[:3]
+        return Women.objects.filter(pk=pk)
+    
+    @action(method=['get'],detail=False)
+    def category(self, request):
+        cats = Category.object.all()
+        return Response({'cats':[c.name for c in cats]})        
 
 # class WomenAPIList(generics.ListCreateAPIView):
 #     queryset = Women.objects.all()
